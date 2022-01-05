@@ -13,7 +13,7 @@ public class Persist {
     public void createConnectionToDatabase () {
         try {
             this.connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/ashCollege", "root", "1234");
+                    "jdbc:mysql://localhost:3306/discountssite", "root", "1234");
         } catch (SQLException e) {
             e.printStackTrace();
         }
