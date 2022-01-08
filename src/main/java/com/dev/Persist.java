@@ -1,6 +1,9 @@
 package com.dev;
 
+import com.dev.objects.Organization;
+import com.dev.objects.Shop;
 import com.dev.objects.UserObject;
+import com.dev.objects.UserToOrganization;
 import com.dev.utils.Utils;
 import org.apache.catalina.User;
 import org.hibernate.Session;
@@ -11,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class Persist {
@@ -90,7 +95,73 @@ public class Persist {
         return success;
     }
 
+    public List<Organization> getAllOrganizations(){
+        Session session = sessionFactory.openSession();
+        List<Organization> organizations = session
+                .createQuery("FROM Organization")
+                .list();
+        return organizations;
+    }
+
+    public List<Organization> getUserOrganization(String token){
+        Session session = sessionFactory.openSession();
+        List<UserToOrganization> userToOrganizations = session
+                .createQuery("FROM UserToOrganization us WHERE us.userObject.token = :token")
+                .setParameter("token",token)
+                .list();
+        List<Organization> organizations = new ArrayList<Organization>();
+        for (UserToOrganization userToOrganization : userToOrganizations )
+            organizations.add(userToOrganization.getOrganization());
+        return organizations;
+    }
+
+    public List<Shop> getAllShops(){
+        Session session = sessionFactory.openSession();
+        List<Shop> shops = session
+                .createQuery("FROM Shop")
+                .list();
+        return shops;
+    }
 
 
-
+    public boolean editUserToOrganization (String token, String organizationName){
+        boolean success = false;
+        Session session = sessionFactory.openSession();
+        UserToOrganization userToOrganization = (UserToOrganization)
+                session
+                        .createQuery("FROM UserToOrganization us WHERE us.userObject.token = :token AND us.organization.organizationName = :organizationName")
+                        .setParameter("token",token)
+                        .setParameter("organizationName",organizationName)
+                        .uniqueResult();
+        UserObject userObject = (UserObject)
+                session
+                        .createQuery("FROM UserObject u WHERE u.token = :token")
+                        .setParameter("token",token)
+                        .uniqueResult();
+        Organization organization = (Organization)
+                session
+                        .createQuery("FROM Organization o WHERE o.organizationName = :organizationName")
+                        .setParameter("organizationName",organizationName)
+                        .uniqueResult();
+        if (userObject != null && organization != null){
+            if (userToOrganization == null){
+                Transaction transaction = session.beginTransaction();
+                UserToOrganization userToOrganization1 = new UserToOrganization();
+                userToOrganization1.setUserObject(userObject);
+                userToOrganization1.setOrganization(organization);
+                session.saveOrUpdate(userToOrganization1);
+                success = true;
+                transaction.commit();
+                session.close();
+            }
+            else{
+                Transaction transaction = session.beginTransaction();
+                session.delete(userToOrganization);
+                success = true;
+                transaction.commit();
+                session.close();
+            }
+        }
+        return success;
+    }
 }

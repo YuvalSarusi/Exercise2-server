@@ -34,6 +34,9 @@ public class TestController {
         return persist.getTokenByUsernameAndPassword(username,password);
     }
 
-
+    @RequestMapping(value = "edit-user-to-organization", method = RequestMethod.POST)
+    public boolean editUserToOrganization (@RequestParam String token, String organizationName) {
+        return persist.editUserToOrganization(token, organizationName);
+    }
 
 }
