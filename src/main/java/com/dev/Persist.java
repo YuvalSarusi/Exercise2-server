@@ -1,5 +1,12 @@
 package com.dev;
 
+import com.dev.objects.UserObject;
+import com.dev.utils.Utils;
+import org.apache.catalina.User;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -9,6 +16,15 @@ import java.sql.*;
 public class Persist {
     private Connection connection;
 
+    private final SessionFactory sessionFactory;
+
+    @Autowired
+    public Persist (SessionFactory sf) {
+        this.sessionFactory = sf;
+    }
+
+
+
     @PostConstruct
     public void createConnectionToDatabase () {
         try {
@@ -17,6 +33,61 @@ public class Persist {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public String getTokenByUsernameAndPassword(String username, String password){
+        String token;
+        Session session = sessionFactory.openSession();
+        if (!this.doesUsernameExist(username))
+            token = "usernameDoesntExist";
+        else{
+            UserObject userObject = (UserObject)
+                    session
+                            .createQuery("FROM UserObject u WHERE u.username = :username AND u.password = :password")
+                            .setParameter("username",username)
+                            .setParameter("password",password)
+                            .uniqueResult();
+            if (userObject == null)
+                token = "passwordIncorrect";
+            else
+                token = userObject.getToken();
+         }
+        return token;
+    }
+
+    public boolean doesUsernameExist(String username){
+        boolean isExist = false;
+        Session session = sessionFactory.openSession();
+        UserObject userObject =  (UserObject)
+                session
+                        .createQuery("FROM UserObject u WHERE u.username = :username")
+                        .setParameter("username",username)
+                        .uniqueResult();
+        if (userObject != null)
+            isExist = true;
+        return isExist;
+    }
+
+    public String createAccount(String username,String password){
+        String success = "failed";
+        Session session = sessionFactory.openSession();
+        //check if username exist or not. success id failed if it inserted into the if and something got wrong
+        if (!this.doesUsernameExist(username)){
+            Transaction transaction = session.beginTransaction();
+            UserObject userObject = new UserObject();
+            userObject.setUsername(username);
+            userObject.setPassword(password);
+            userObject.setToken(Utils.createHash(username,password));
+            session.saveOrUpdate(userObject);
+            success = userObject.getToken();
+            transaction.commit();
+            session.close();
+        }
+        else if (this.doesUsernameExist(username))
+            success = "usernameExist";
+        //return "failed" if something got wrong, token if succeed and "usernameExist" if username is taken
+        return success;
     }
 
 
