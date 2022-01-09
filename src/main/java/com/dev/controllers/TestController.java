@@ -67,6 +67,9 @@ public class TestController {
         return persist.getShopSales(shopId);
     }
 
-
+    @RequestMapping("get-shop-by-id")
+    public Shop getShopById(int shopId){
+        return persist.getShopById(shopId);
+    }
 
 }

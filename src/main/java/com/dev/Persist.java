@@ -13,6 +13,7 @@ import software.amazon.awssdk.regions.regionmetadata.SaEast1;
 import javax.annotation.PostConstruct;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -178,8 +179,9 @@ public class Persist {
         for (Organization organization : organizations){
             sales.add((Sale)
                     session
-                            .createQuery("SELECT Sale FROM SaleToOrganization so WHERE so.organization = :organization")
+                            .createQuery("SELECT Sale FROM SaleToOrganization so WHERE so.organization = :organization AND so.sale.endTime < :thisTime")
                             .setParameter("organization", organization)
+                            .setParameter("thisTime",new Date().getTime())
                             .uniqueResult()
             );
         }
