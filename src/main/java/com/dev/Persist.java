@@ -177,14 +177,13 @@ public class Persist {
 
         List<Sale> sales = new ArrayList<>();
         for (Organization organization : organizations){
-            SaleToOrganization saleToOrganization = (SaleToOrganization)
-                    session
-                            .createQuery("FROM SaleToOrganization so WHERE so.organization.id = :organizationId")
-                            .setParameter("organizationId", organization.getId())
-                            .uniqueResult();
-            sales.add(saleToOrganization.getSale());
+            List<SaleToOrganization> saleToOrganizations = session
+                    .createQuery("FROM SaleToOrganization so WHERE so.organization.id = :organizationId")
+                    .setParameter("organizationId", organization.getId())
+                    .list();
+            for (SaleToOrganization saleToOrganization : saleToOrganizations)
+                sales.add(saleToOrganization.getSale());
         }
-
         return sales;
     }
 
