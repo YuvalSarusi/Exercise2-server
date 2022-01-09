@@ -21,13 +21,13 @@ public class Sale {
     private String description;
 
     @Column(name = "start_time")
-    private String startTime;
+    private Date startTime;
 
     @Column(name = "end_time")
-    private String endTime;
+    private Date endTime;
 
 
-    public Sale(int id, Shop shop, String description, String startTime, String endTime, Organization organization) {
+    public Sale(int id, Shop shop, String description, Date startTime, Date endTime, Organization organization) {
         this.id = id;
         this.shop = shop;
         this.description = description;
@@ -62,19 +62,19 @@ public class Sale {
         this.description = description;
     }
 
-    public String getStartTime() {
+    public Date getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Date endTime) {
         this.endTime = endTime;
     }
 

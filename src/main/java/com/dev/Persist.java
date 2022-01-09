@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.regions.regionmetadata.SaEast1;
 
 import javax.annotation.PostConstruct;
 import java.sql.*;
@@ -184,6 +185,25 @@ public class Persist {
         }
 
         return sales;
-
     }
+
+    public List<Sale> getShopSales(int shopId){
+        Session session = sessionFactory.openSession();
+        List<Sale> sales = session
+                .createQuery("FROM Sale s WHERE s.shop.id = :shopId")
+                .setParameter("shopId", shopId)
+                .list();
+        return sales;
+    }
+
+    public Shop getShopById(int shopId){
+        Session session = sessionFactory.openSession();
+        Shop shop = (Shop)
+                session
+                        .createQuery("FROM Shop s WHERE s.id = :shopId")
+                        .setParameter("shopId", shopId)
+                        .uniqueResult();
+        return shop;
+    }
+
 }

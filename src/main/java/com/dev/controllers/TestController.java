@@ -61,4 +61,12 @@ public class TestController {
     public List<Organization> getOrganizationOfUser(String token){
         return persist.getUserOrganization(token);
     }
+
+    @RequestMapping("get-all-sales-of-shop")
+    public List<Sale> getShopSales(int shopId){
+        return persist.getShopSales(shopId);
+    }
+
+
+
 }
