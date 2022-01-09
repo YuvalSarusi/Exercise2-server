@@ -57,4 +57,8 @@ public class TestController {
         return persist.getUserSales(token);
     }
 
+    @RequestMapping("get-all-organizations-of-user")
+    public List<Organization> getOrganizationOfUser(String token){
+        return persist.getUserOrganization(token);
+    }
 }
