@@ -1,9 +1,6 @@
 package com.dev;
 
-import com.dev.objects.Organization;
-import com.dev.objects.Shop;
-import com.dev.objects.UserObject;
-import com.dev.objects.UserToOrganization;
+import com.dev.objects.*;
 import com.dev.utils.Utils;
 import org.apache.catalina.User;
 import org.hibernate.Session;
@@ -123,7 +120,6 @@ public class Persist {
         return shops;
     }
 
-
     public boolean editUserToOrganization (String token, String organizationName){
         boolean success = false;
         Session session = sessionFactory.openSession();
@@ -163,5 +159,31 @@ public class Persist {
             }
         }
         return success;
+    }
+
+    public List<Sale> getAllSales(){
+        Session session = sessionFactory.openSession();
+        List<Sale> sales = session
+                .createQuery("FROM Sale ")
+                .list();
+        return sales;
+    }
+
+    public List<Sale> getUserSales(String token){
+        Session session = sessionFactory.openSession();
+        List<Organization> organizations = this.getUserOrganization(token);
+
+        List<Sale> sales = new ArrayList<>();
+        for (Organization organization : organizations){
+            sales.add((Sale)
+                    session
+                            .createQuery("SELECT Sale FROM SaleToOrganization so WHERE so.organization = :organization")
+                            .setParameter("organization", organization)
+                            .uniqueResult()
+            );
+        }
+
+        return sales;
+
     }
 }

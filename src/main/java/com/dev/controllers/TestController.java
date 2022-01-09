@@ -1,6 +1,8 @@
 package com.dev.controllers;
 
 import com.dev.Persist;
+import com.dev.objects.Organization;
+import com.dev.objects.Sale;
 import com.dev.objects.Shop;
 import com.dev.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +42,19 @@ public class TestController {
         return persist.editUserToOrganization(token, organizationName);
     }
 
-    @RequestMapping("getAllShops")
+    @RequestMapping("get-all-shops")
     public List<Shop> getAllShops(){
         return persist.getAllShops();
+    }
+
+    @RequestMapping("get-all-organizations")
+    public List<Organization> getAllOrganizations(){
+        return persist.getAllOrganizations();
+    }
+
+    @RequestMapping("get-user-sales")
+    public List<Sale> getUserSales(String token){
+        return persist.getUserSales(token);
     }
 
 }
