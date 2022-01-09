@@ -179,9 +179,8 @@ public class Persist {
         for (Organization organization : organizations){
             sales.add((Sale)
                     session
-                            .createQuery("SELECT Sale FROM SaleToOrganization so WHERE so.organization = :organization AND so.sale.endTime < :thisTime")
-                            .setParameter("organization", organization)
-                            .setParameter("thisTime",new Date().getTime())
+                            .createQuery("SELECT Sale FROM SaleToOrganization so WHERE so.organization.id = :organizationId")
+                            .setParameter("organizationId", organization.getId())
                             .uniqueResult()
             );
         }
