@@ -207,7 +207,7 @@ public class Persist {
         return shop;
     }
 
-    public List<Sale> getSalesByWord(String text){
+    public List<Sale> getFilteredSales(String text){
         List<Sale> allSales = this.getAllSales();
         List<Sale> filteredSales = new ArrayList<>();
         for (Sale sale: allSales){

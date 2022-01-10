@@ -77,4 +77,9 @@ public class TestController {
         return persist.getAllSales();
     }
 
+    @RequestMapping("get-filtered-sales")
+    public List<Sale> getFilteredSales(String text){
+        return persist.getFilteredSales(text);
+    }
+
 }
