@@ -15,6 +15,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Component
 public class Persist {
@@ -122,14 +123,14 @@ public class Persist {
         return shops;
     }
 
-    public boolean editUserToOrganization (String token, String organizationName){
+    public boolean editUserToOrganization (String token, int organizationId){
         boolean success = false;
         Session session = sessionFactory.openSession();
         UserToOrganization userToOrganization = (UserToOrganization)
                 session
-                        .createQuery("FROM UserToOrganization us WHERE us.userObject.token = :token AND us.organization.organizationName = :organizationName")
+                        .createQuery("FROM UserToOrganization us WHERE us.userObject.token = :token AND us.organization.id = :organizationId")
                         .setParameter("token",token)
-                        .setParameter("organizationName",organizationName)
+                        .setParameter("organizationId",organizationId)
                         .uniqueResult();
         UserObject userObject = (UserObject)
                 session
@@ -138,8 +139,8 @@ public class Persist {
                         .uniqueResult();
         Organization organization = (Organization)
                 session
-                        .createQuery("FROM Organization o WHERE o.organizationName = :organizationName")
-                        .setParameter("organizationName",organizationName)
+                        .createQuery("FROM Organization o WHERE o.id = :organizationId")
+                        .setParameter("organizationId",organizationId)
                         .uniqueResult();
         if (userObject != null && organization != null){
             if (userToOrganization == null){
@@ -204,6 +205,17 @@ public class Persist {
                         .setParameter("shopId", shopId)
                         .uniqueResult();
         return shop;
+    }
+
+    public List<Sale> getSalesByWord(String text){
+        List<Sale> allSales = this.getAllSales();
+        List<Sale> filteredSales = new ArrayList<>();
+        for (Sale sale: allSales){
+            String saleDescriptionLowercase = sale.getDescription().toLowerCase();
+            if (saleDescriptionLowercase.contains(text.toLowerCase()))
+                filteredSales.add(sale);
+        }
+        return filteredSales;
     }
 
 }

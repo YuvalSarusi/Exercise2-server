@@ -38,8 +38,8 @@ public class TestController {
     }
 
     @RequestMapping(value = "edit-user-to-organization", method = RequestMethod.POST)
-    public boolean editUserToOrganization (@RequestParam String token, String organizationName) {
-        return persist.editUserToOrganization(token, organizationName);
+    public boolean editUserToOrganization (@RequestParam String token, int organizationId) {
+        return persist.editUserToOrganization(token, organizationId);
     }
 
     @RequestMapping("get-all-shops")
@@ -70,6 +70,11 @@ public class TestController {
     @RequestMapping("get-shop-by-id")
     public Shop getShopById(int shopId){
         return persist.getShopById(shopId);
+    }
+
+    @RequestMapping("get-all-sales")
+    public List<Sale> getAllSales(){
+        return persist.getAllSales();
     }
 
 }
