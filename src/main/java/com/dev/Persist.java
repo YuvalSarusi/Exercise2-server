@@ -169,7 +169,7 @@ public class Persist {
         List<Sale> sales = session
                 .createQuery("FROM Sale ")
                 .list();
-        return sales;
+        return removeDoubleSales(sales);
     }
 
     public List<Sale> getUserSales(String token){
@@ -185,7 +185,7 @@ public class Persist {
             for (SaleToOrganization saleToOrganization : saleToOrganizations)
                 sales.add(saleToOrganization.getSale());
         }
-        return sales;
+        return removeDoubleSales(sales);
     }
 
     public List<Sale> getShopSales(int shopId){
@@ -215,7 +215,16 @@ public class Persist {
             if (saleDescriptionLowercase.contains(text.toLowerCase()))
                 filteredSales.add(sale);
         }
-        return filteredSales;
+        return removeDoubleSales(filteredSales);
+    }
+
+    private List<Sale> removeDoubleSales(List<Sale> saleList){
+        List<Sale> cleanList = new ArrayList<>();
+        for (Sale sale : saleList){
+            if (!cleanList.contains(sale))
+                cleanList.add(sale);
+        }
+        return cleanList;
     }
 
 }
