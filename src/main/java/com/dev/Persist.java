@@ -218,6 +218,23 @@ public class Persist {
         return removeDoubleSales(filteredSales);
     }
 
+    public List<UserObject> getSaleUsers(int saleId){
+        Session session = sessionFactory.openSession();
+        List<Organization> organizations = session
+                .createQuery("SELECT Organization FROM SaleToOrganization so WHERE so.sale.id = :saleId")
+                .setParameter("saleId",saleId)
+                .list();
+        List<UserObject> allUsers = new ArrayList<UserObject>();
+        for (Organization organization : organizations){
+            List<UserObject> userObjects = session
+                    .createQuery("SELECT UserObject FROM UserToOrganization uo WHERE uo.organization.id = :organizationId")
+                    .setParameter("organizationId",organization.getId())
+                    .list();
+            allUsers.addAll(userObjects);
+        }
+        return allUsers;
+    }
+
     private List<Sale> removeDoubleSales(List<Sale> saleList){
         List<Sale> cleanList = new ArrayList<>();
         for (Sale sale : saleList){
@@ -226,5 +243,7 @@ public class Persist {
         }
         return cleanList;
     }
+
+
 
 }
