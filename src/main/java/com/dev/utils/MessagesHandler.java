@@ -15,6 +15,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,7 +41,7 @@ public class MessagesHandler extends TextWebSocketHandler {
                 try {
                     Thread.sleep(1000);
                     allSales = persist.getAllSales();
-
+                    checkSalesDate();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -79,22 +80,28 @@ public class MessagesHandler extends TextWebSocketHandler {
     }
 
     public void checkSalesStarted(Sale sale){
-            if (sale.getStartTime().getTime() == date.getTime()){
-                List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
-                for (UserObject userObject : userObjects){
-                    this.sendMessageSaleStarted(userObject.getToken(),sale);
-                    System.out.println("the sale " + sale.getDescription() + "started!!!");
-                }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm");
+        String saleDate = dateFormat.format(sale.getStartTime());
+        String currentDate = dateFormat.format(date.getTime());
+        if (saleDate == currentDate){
+            List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
+            for (UserObject userObject : userObjects){
+                this.sendMessageSaleStarted(userObject.getToken(),sale);
+                System.out.println("the sale " + sale.getDescription() + "started!!!");
             }
+        }
     }
 
     public void checkSalesEnded(Sale sale){
-            if (sale.getStartTime().getTime() == date.getTime()){
-                List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
-                for (UserObject userObject : userObjects){
-                    this.sendMessageSaleStarted(userObject.getToken(),sale);
-                }
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm");
+        String saleDate = dateFormat.format(sale.getEndTime());
+        String currentDate = dateFormat.format(date.getTime());
+        if (saleDate == currentDate){
+            List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
+            for (UserObject userObject : userObjects){
+                this.sendMessageSaleEnded(userObject.getToken(),sale);
             }
+        }
     }
 
     public void sendMessageSaleStarted(String userToken, Sale sale){
