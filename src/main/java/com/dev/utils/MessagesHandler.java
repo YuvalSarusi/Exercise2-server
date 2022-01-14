@@ -39,9 +39,10 @@ public class MessagesHandler extends TextWebSocketHandler {
         new Thread(() -> {
             while (true) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(60000);
                     allSales = persist.getAllSales();
                     checkSalesDate();
+                    check();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -83,7 +84,7 @@ public class MessagesHandler extends TextWebSocketHandler {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm");
         String saleDate = dateFormat.format(sale.getStartTime());
         String currentDate = dateFormat.format(date.getTime());
-        if (saleDate == currentDate){
+        if (saleDate.equals(currentDate)){
             List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
             for (UserObject userObject : userObjects){
                 this.sendMessageSaleStarted(userObject.getToken(),sale);
@@ -96,7 +97,7 @@ public class MessagesHandler extends TextWebSocketHandler {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm");
         String saleDate = dateFormat.format(sale.getEndTime());
         String currentDate = dateFormat.format(date.getTime());
-        if (saleDate == currentDate){
+        if (saleDate.equals(currentDate)){
             List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
             for (UserObject userObject : userObjects){
                 this.sendMessageSaleEnded(userObject.getToken(),sale);
@@ -134,5 +135,16 @@ public class MessagesHandler extends TextWebSocketHandler {
         }
     }
 
-
+    public void check(){
+        for(Map.Entry<String, WebSocketSession> session : sessionMap.entrySet()) {
+            try{
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("Is Work","Yes");
+                session.getValue().sendMessage(new TextMessage(jsonObject.toString()));
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
 }
