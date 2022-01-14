@@ -6,6 +6,7 @@ import com.dev.objects.Sale;
 import com.dev.objects.UserObject;
 import org.apache.catalina.User;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -28,7 +29,9 @@ public class MessagesHandler extends TextWebSocketHandler {
     private static List<Sale> allSales = new ArrayList<Sale>();
     private static Date date = new Date();
     private static int totalSessions;
-    private Persist persist;
+
+    @Autowired
+    private Persist persist ;
 
     @PostConstruct
     public void init () {
@@ -80,6 +83,7 @@ public class MessagesHandler extends TextWebSocketHandler {
                 List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
                 for (UserObject userObject : userObjects){
                     this.sendMessageSaleStarted(userObject.getToken(),sale);
+                    System.out.println("the sale " + sale.getDescription() + "started!!!");
                 }
             }
     }
