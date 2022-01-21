@@ -220,16 +220,30 @@ public class Persist {
 
     public List<UserObject> getSaleUsers(int saleId){
         Session session = sessionFactory.openSession();
-        List<Organization> organizations = session
-                .createQuery("SELECT Organization FROM SaleToOrganization so WHERE so.sale.id = :saleId")
+        List<SaleToOrganization> saleToOrganizations = session
+                .createQuery("FROM SaleToOrganization so WHERE so.sale.id = :saleId")
                 .setParameter("saleId",saleId)
                 .list();
+        List<Organization> organizations = new ArrayList<>();
+        if (!saleToOrganizations.isEmpty()){
+            for (SaleToOrganization saleToOrganization : saleToOrganizations){
+                if (saleToOrganization != null)
+                    organizations.add(saleToOrganization.getOrganization());
+            }
+        }
         List<UserObject> allUsers = new ArrayList<UserObject>();
         for (Organization organization : organizations){
-            List<UserObject> userObjects = session
-                    .createQuery("SELECT UserObject FROM UserToOrganization uo WHERE uo.organization.id = :organizationId")
+            List<UserToOrganization> userToOrganizations = session
+                    .createQuery("FROM UserToOrganization uo WHERE uo.organization.id = :organizationId")
                     .setParameter("organizationId",organization.getId())
                     .list();
+            List<UserObject> userObjects = new ArrayList<>();
+            if (!userToOrganizations.isEmpty()){
+                for (UserToOrganization userToOrganization : userToOrganizations){
+                    if (userToOrganization != null)
+                        userObjects.add(userToOrganization.getUserObject());
+                }
+            }
             allUsers.addAll(userObjects);
         }
         return allUsers;

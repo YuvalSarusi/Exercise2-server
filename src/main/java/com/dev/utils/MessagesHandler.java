@@ -28,7 +28,6 @@ public class MessagesHandler extends TextWebSocketHandler {
     private static List<WebSocketSession> sessionList = new CopyOnWriteArrayList<>();
     private static Map<String, WebSocketSession> sessionMap = new HashMap<>();
     private static List<Sale> allSales = new ArrayList<Sale>();
-    private static Date date = new Date();
     private static int totalSessions;
 
     @Autowired
@@ -55,6 +54,7 @@ public class MessagesHandler extends TextWebSocketHandler {
         super.afterConnectionEstablished(session);
         Map<String, String> map = Utils.splitQuery(session.getUri().getQuery());
         sessionMap.put(map.get("token"),session);
+        sessionList.add(session);
         totalSessions = sessionList.size();
         System.out.println("afterConnectionEstablished");
     }
@@ -69,6 +69,7 @@ public class MessagesHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
         sessionList.remove(session);
+        sessionMap.remove(session);
         System.out.println("afterConnectionClosed");
     }
 
@@ -81,10 +82,14 @@ public class MessagesHandler extends TextWebSocketHandler {
     }
 
     public void checkSalesStarted(Sale sale){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String saleDate = dateFormat.format(sale.getStartTime());
+        Date date = new Date();
         String currentDate = dateFormat.format(date.getTime());
+        System.out.println("sale start: "+ saleDate);
+        System.out.println("current date: "+currentDate);
         if (saleDate.equals(currentDate)){
+            System.out.println("start");
             List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
             for (UserObject userObject : userObjects){
                 this.sendMessageSaleStarted(userObject.getToken(),sale);
@@ -94,10 +99,14 @@ public class MessagesHandler extends TextWebSocketHandler {
     }
 
     public void checkSalesEnded(Sale sale){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String saleDate = dateFormat.format(sale.getEndTime());
+        Date date = new Date();
         String currentDate = dateFormat.format(date.getTime());
+        System.out.println("sale end: "+ saleDate);
+        System.out.println("current date: "+currentDate);
         if (saleDate.equals(currentDate)){
+            System.out.println("end");
             List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
             for (UserObject userObject : userObjects){
                 this.sendMessageSaleEnded(userObject.getToken(),sale);
@@ -110,7 +119,7 @@ public class MessagesHandler extends TextWebSocketHandler {
             if(userToken == session.getKey()){
                 try{
                     JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("saleStarted", sale.getShop().getName()+", "+sale.getDescription()+" just started!");
+                    jsonObject.put("start", sale.getShop().getName()+", "+sale.getDescription()+" just started!");
                     session.getValue().sendMessage(new TextMessage(jsonObject.toString()));
                 }
                 catch (IOException e){
@@ -125,7 +134,7 @@ public class MessagesHandler extends TextWebSocketHandler {
             if(userToken == session.getKey()){
                 try{
                     JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("saleEnded", sale.getShop().getName()+", "+sale.getDescription()+" just ended!");
+                    jsonObject.put("end", sale.getShop().getName()+", "+sale.getDescription()+" just ended!");
                     session.getValue().sendMessage(new TextMessage(jsonObject.toString()));
                 }
                 catch (IOException e){
@@ -136,11 +145,11 @@ public class MessagesHandler extends TextWebSocketHandler {
     }
 
     public void check(){
-        for(Map.Entry<String, WebSocketSession> session : sessionMap.entrySet()) {
+        for(WebSocketSession session : sessionMap.values()) {
             try{
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("Is Work","Yes");
-                session.getValue().sendMessage(new TextMessage(jsonObject.toString()));
+                jsonObject.put("isWork","Yes");
+                session.sendMessage(new TextMessage(jsonObject.toString()));
             }
             catch (IOException e){
                 e.printStackTrace();
