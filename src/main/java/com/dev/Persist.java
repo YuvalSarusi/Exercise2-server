@@ -246,7 +246,7 @@ public class Persist {
             }
             allUsers.addAll(userObjects);
         }
-        return allUsers;
+        return removeDoubleUsers(allUsers);
     }
 
     private List<Sale> removeDoubleSales(List<Sale> saleList){
@@ -254,6 +254,15 @@ public class Persist {
         for (Sale sale : saleList){
             if (!cleanList.contains(sale))
                 cleanList.add(sale);
+        }
+        return cleanList;
+    }
+
+    private List<UserObject> removeDoubleUsers(List<UserObject> userObjectList){
+        List<UserObject> cleanList = new ArrayList<>();
+        for (UserObject userObject : userObjectList){
+            if (!cleanList.contains(userObject))
+                cleanList.add(userObject);
         }
         return cleanList;
     }
