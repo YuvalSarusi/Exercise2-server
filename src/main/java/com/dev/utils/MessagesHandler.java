@@ -89,12 +89,12 @@ public class MessagesHandler extends TextWebSocketHandler {
         System.out.println("sale start: "+ saleDate);
         System.out.println("current date: "+currentDate);
         if (saleDate.equals(currentDate)){
-            System.out.println("start");
             List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
             for (UserObject userObject : userObjects){
                 this.sendMessageSaleStarted(userObject.getToken(),sale);
                 System.out.println("the sale " + sale.getDescription() + "started!!!");
             }
+            System.out.println("start");
         }
     }
 
@@ -106,17 +106,17 @@ public class MessagesHandler extends TextWebSocketHandler {
         System.out.println("sale end: "+ saleDate);
         System.out.println("current date: "+currentDate);
         if (saleDate.equals(currentDate)){
-            System.out.println("end");
             List<UserObject> userObjects = persist.getSaleUsers(sale.getId());
             for (UserObject userObject : userObjects){
                 this.sendMessageSaleEnded(userObject.getToken(),sale);
             }
+            System.out.println("end");
         }
     }
 
     public void sendMessageSaleStarted(String userToken, Sale sale){
         for(Map.Entry<String, WebSocketSession> session : sessionMap.entrySet()){
-            if(userToken == session.getKey()){
+            if(userToken.equals(session.getKey())){
                 try{
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("start", sale.getShop().getName()+", "+sale.getDescription()+" just started!");
@@ -131,7 +131,7 @@ public class MessagesHandler extends TextWebSocketHandler {
 
     public void sendMessageSaleEnded(String userToken, Sale sale){
         for(Map.Entry<String, WebSocketSession> session : sessionMap.entrySet()){
-            if(userToken == session.getKey()){
+            if(userToken.equals(session.getKey())){
                 try{
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("end", sale.getShop().getName()+", "+sale.getDescription()+" just ended!");
