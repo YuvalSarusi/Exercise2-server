@@ -2,20 +2,16 @@ package com.dev;
 
 import com.dev.objects.*;
 import com.dev.utils.Utils;
-import org.apache.catalina.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import software.amazon.awssdk.regions.regionmetadata.SaEast1;
 
 import javax.annotation.PostConstruct;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 @Component
 public class Persist {
@@ -103,7 +99,7 @@ public class Persist {
         return organizations;
     }
 
-    public List<Organization> getUserOrganization(String token){
+    public List<Organization> getUserOrganizations(String token){
         Session session = sessionFactory.openSession();
         List<UserToOrganization> userToOrganizations = session
                 .createQuery("FROM UserToOrganization us WHERE us.userObject.token = :token")
@@ -172,10 +168,17 @@ public class Persist {
         return removeDoubleSales(sales);
     }
 
+    public List<Sale> getAllPublicSales(){
+        Session session = sessionFactory.openSession();
+        List<Sale> sales = session
+                .createQuery("FROM Sale s WHERE s.isForAll = 1")
+                .list();
+        return sales;
+    }
+
     public List<Sale> getUserSales(String token){
         Session session = sessionFactory.openSession();
-        List<Organization> organizations = this.getUserOrganization(token);
-
+        List<Organization> organizations = this.getUserOrganizations(token);
         List<Sale> sales = new ArrayList<>();
         for (Organization organization : organizations){
             List<SaleToOrganization> saleToOrganizations = session
@@ -185,6 +188,7 @@ public class Persist {
             for (SaleToOrganization saleToOrganization : saleToOrganizations)
                 sales.add(saleToOrganization.getSale());
         }
+        sales.addAll(this.getAllPublicSales());
         return removeDoubleSales(sales);
     }
 
@@ -220,31 +224,38 @@ public class Persist {
 
     public List<UserObject> getSaleUsers(int saleId){
         Session session = sessionFactory.openSession();
-        List<SaleToOrganization> saleToOrganizations = session
-                .createQuery("FROM SaleToOrganization so WHERE so.sale.id = :saleId")
-                .setParameter("saleId",saleId)
-                .list();
-        List<Organization> organizations = new ArrayList<>();
-        if (!saleToOrganizations.isEmpty()){
-            for (SaleToOrganization saleToOrganization : saleToOrganizations){
-                if (saleToOrganization != null)
-                    organizations.add(saleToOrganization.getOrganization());
-            }
-        }
         List<UserObject> allUsers = new ArrayList<UserObject>();
-        for (Organization organization : organizations){
-            List<UserToOrganization> userToOrganizations = session
-                    .createQuery("FROM UserToOrganization uo WHERE uo.organization.id = :organizationId")
-                    .setParameter("organizationId",organization.getId())
+        if (this.getSaleById(saleId).isForAll() == 0){
+            List<SaleToOrganization> saleToOrganizations = session
+                    .createQuery("FROM SaleToOrganization so WHERE so.sale.id = :saleId")
+                    .setParameter("saleId",saleId)
                     .list();
-            List<UserObject> userObjects = new ArrayList<>();
-            if (!userToOrganizations.isEmpty()){
-                for (UserToOrganization userToOrganization : userToOrganizations){
-                    if (userToOrganization != null)
-                        userObjects.add(userToOrganization.getUserObject());
+            List<Organization> organizations = new ArrayList<>();
+            if (!saleToOrganizations.isEmpty()){
+                for (SaleToOrganization saleToOrganization : saleToOrganizations){
+                    if (saleToOrganization != null)
+                        organizations.add(saleToOrganization.getOrganization());
                 }
             }
-            allUsers.addAll(userObjects);
+            for (Organization organization : organizations){
+                List<UserToOrganization> userToOrganizations = session
+                        .createQuery("FROM UserToOrganization uo WHERE uo.organization.id = :organizationId")
+                        .setParameter("organizationId",organization.getId())
+                        .list();
+                List<UserObject> userObjects = new ArrayList<>();
+                if (!userToOrganizations.isEmpty()){
+                    for (UserToOrganization userToOrganization : userToOrganizations){
+                        if (userToOrganization != null)
+                            userObjects.add(userToOrganization.getUserObject());
+                    }
+                }
+                allUsers.addAll(userObjects);
+            }
+        }
+        else{
+            allUsers = session
+                    .createQuery("FROM UserObject")
+                    .list();
         }
         return removeDoubleUsers(allUsers);
     }
@@ -267,6 +278,14 @@ public class Persist {
         return cleanList;
     }
 
+    public Sale getSaleById(int saleId){
+        Session session = sessionFactory.openSession();
+        Sale sale = (Sale) session
+                .createQuery("FROM Sale s WHERE s.id = :saleId")
+                .setParameter("saleId",saleId)
+                .uniqueResult();
+        return sale;
+    }
 
 
 }

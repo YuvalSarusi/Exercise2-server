@@ -26,6 +26,9 @@ public class Sale {
     @Column(name = "end_time")
     private Date endTime;
 
+    @Column(name = "is_for_all")
+    private int isForAll;
+
 
     public Sale(int id, Shop shop, String description, Date startTime, Date endTime, Organization organization) {
         this.id = id;
@@ -33,6 +36,15 @@ public class Sale {
         this.description = description;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    public Sale(int id, Shop shop, String description, Date startTime, Date endTime, int isForAll) {
+        this.id = id;
+        this.shop = shop;
+        this.description = description;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isForAll = isForAll;
     }
 
     public Sale() {
@@ -78,4 +90,13 @@ public class Sale {
         this.endTime = endTime;
     }
 
+
+
+    public int isForAll() {
+        return isForAll;
+    }
+
+    public void setForAll(int forAll) {
+        isForAll = forAll;
+    }
 }

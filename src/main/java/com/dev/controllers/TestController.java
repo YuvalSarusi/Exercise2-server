@@ -4,7 +4,6 @@ import com.dev.Persist;
 import com.dev.objects.Organization;
 import com.dev.objects.Sale;
 import com.dev.objects.Shop;
-import com.dev.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,7 +58,7 @@ public class TestController {
 
     @RequestMapping("get-all-organizations-of-user")
     public List<Organization> getOrganizationOfUser(String token){
-        return persist.getUserOrganization(token);
+        return persist.getUserOrganizations(token);
     }
 
     @RequestMapping("get-all-sales-of-shop")
